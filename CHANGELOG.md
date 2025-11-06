@@ -7,6 +7,24 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.22] - 2025-10-16
+
+### Added
+
+- Introduced a Codex-focused `AGENTS.md` template and updated release packaging to include `.codex/AGENTS.md` as the primary entry point for the VS Code extension.
+
+### Changed
+
+- Treated Codex as an IDE-based assistant inside the CLI (no CLI checks) and updated onboarding messages to point users to `.codex/AGENTS.md`.
+- Refreshed documentation (`AGENTS.md`, README, installation guide) with VS Code setup steps and Codex-oriented workflows.
+
+## [0.0.21] - 2025-10-15
+
+### Changed
+
+- Streamlined the Specify CLI to default to the Codex VS Code extension, removing interactive agent selection.
+- Updated documentation to focus on Codex-driven workflows, including README, installation, and local development guides.
+
 ## [0.0.20] - 2025-10-14
 
 ### Added

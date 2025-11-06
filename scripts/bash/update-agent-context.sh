@@ -598,7 +598,7 @@ update_specific_agent() {
             update_agent_file "$AGENTS_FILE" "opencode"
             ;;
         codex)
-            update_agent_file "$AGENTS_FILE" "Codex CLI"
+            update_agent_file "$AGENTS_FILE" "Codex VS Code extension"
             ;;
         windsurf)
             update_agent_file "$WINDSURF_FILE" "Windsurf"

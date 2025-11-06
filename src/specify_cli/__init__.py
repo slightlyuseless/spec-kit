@@ -30,7 +30,6 @@ import sys
 import zipfile
 import tempfile
 import shutil
-import shlex
 import json
 from pathlib import Path
 from typing import Optional, Tuple
@@ -66,91 +65,15 @@ def _github_auth_headers(cli_token: str | None = None) -> dict:
 
 # Agent configuration with name, folder, install URL, and CLI tool requirement
 AGENT_CONFIG = {
-    "copilot": {
-        "name": "GitHub Copilot",
-        "folder": ".github/",
-        "install_url": None,  # IDE-based, no CLI check needed
-        "requires_cli": False,
-    },
-    "claude": {
-        "name": "Claude Code",
-        "folder": ".claude/",
-        "install_url": "https://docs.anthropic.com/en/docs/claude-code/setup",
-        "requires_cli": True,
-    },
-    "gemini": {
-        "name": "Gemini CLI",
-        "folder": ".gemini/",
-        "install_url": "https://github.com/google-gemini/gemini-cli",
-        "requires_cli": True,
-    },
-    "cursor-agent": {
-        "name": "Cursor",
-        "folder": ".cursor/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "qwen": {
-        "name": "Qwen Code",
-        "folder": ".qwen/",
-        "install_url": "https://github.com/QwenLM/qwen-code",
-        "requires_cli": True,
-    },
-    "opencode": {
-        "name": "opencode",
-        "folder": ".opencode/",
-        "install_url": "https://opencode.ai",
-        "requires_cli": True,
-    },
     "codex": {
-        "name": "Codex CLI",
+        "name": "Codex VS Code extension",
         "folder": ".codex/",
-        "install_url": "https://github.com/openai/codex",
-        "requires_cli": True,
-    },
-    "windsurf": {
-        "name": "Windsurf",
-        "folder": ".windsurf/",
-        "install_url": None,  # IDE-based
+        "install_url": None,
         "requires_cli": False,
-    },
-    "kilocode": {
-        "name": "Kilo Code",
-        "folder": ".kilocode/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "auggie": {
-        "name": "Auggie CLI",
-        "folder": ".augment/",
-        "install_url": "https://docs.augmentcode.com/cli/setup-auggie/install-auggie-cli",
-        "requires_cli": True,
-    },
-    "codebuddy": {
-        "name": "CodeBuddy",
-        "folder": ".codebuddy/",
-        "install_url": "https://www.codebuddy.ai/cli",
-        "requires_cli": True,
-    },
-    "roo": {
-        "name": "Roo Code",
-        "folder": ".roo/",
-        "install_url": None,  # IDE-based
-        "requires_cli": False,
-    },
-    "q": {
-        "name": "Amazon Q Developer CLI",
-        "folder": ".amazonq/",
-        "install_url": "https://aws.amazon.com/developer/learning/q-developer-cli/",
-        "requires_cli": True,
-    },
-    "amp": {
-        "name": "Amp",
-        "folder": ".agents/",
-        "install_url": "https://ampcode.com/manual#install",
-        "requires_cli": True,
     },
 }
+
+DEFAULT_AI_ASSISTANT = "codex"
 
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
@@ -865,9 +788,9 @@ def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = 
 @app.command()
 def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
-    ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, codebuddy, amp, or q"),
+    ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use (defaults to the Codex VS Code extension)."),
     script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
-    ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
+    ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip AI assistant tool checks (not required for Codex)."),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
     force: bool = typer.Option(False, "--force", help="Force merge/overwrite when using --here (skip confirmation)"),
@@ -880,22 +803,20 @@ def init(
     
     This command will:
     1. Check that required tools are installed (git is optional)
-    2. Let you choose your AI assistant
+    2. Configure Codex-specific assets for the VS Code extension
     3. Download the appropriate template from GitHub
     4. Extract the template to a new project directory or current directory
     5. Initialize a fresh git repository (if not --no-git and no existing repo)
-    6. Optionally set up AI assistant commands
-    
+    6. Generate Codex command files and next steps
+
     Examples:
         specify init my-project
-        specify init my-project --ai claude
-        specify init my-project --ai copilot --no-git
+        specify init my-project --ai codex
+        specify init my-project --ai codex --no-git
         specify init --ignore-agent-tools my-project
-        specify init . --ai claude         # Initialize in current directory
-        specify init .                     # Initialize in current directory (interactive AI selection)
-        specify init --here --ai claude    # Alternative syntax for current directory
-        specify init --here --ai codex
-        specify init --here --ai codebuddy
+        specify init . --ai codex         # Initialize in current directory
+        specify init .                    # Initialize in current directory (Codex by default)
+        specify init --here --ai codex    # Alternative syntax for current directory
         specify init --here
         specify init --here --force  # Skip confirmation when current directory not empty
     """
@@ -963,19 +884,13 @@ def init(
         if not should_init_git:
             console.print("[yellow]Git not found - will skip repository initialization[/yellow]")
 
-    if ai_assistant:
-        if ai_assistant not in AGENT_CONFIG:
-            console.print(f"[red]Error:[/red] Invalid AI assistant '{ai_assistant}'. Choose from: {', '.join(AGENT_CONFIG.keys())}")
-            raise typer.Exit(1)
-        selected_ai = ai_assistant
-    else:
-        # Create options dict for selection (agent_key: display_name)
-        ai_choices = {key: config["name"] for key, config in AGENT_CONFIG.items()}
-        selected_ai = select_with_arrows(
-            ai_choices, 
-            "Choose your AI assistant:", 
-            "copilot"
-        )
+    selected_ai = ai_assistant or DEFAULT_AI_ASSISTANT
+    if selected_ai not in AGENT_CONFIG:
+        console.print(f"[red]Error:[/red] Invalid AI assistant '{selected_ai}'. Choose from: {', '.join(AGENT_CONFIG.keys())}")
+        raise typer.Exit(1)
+
+    if ai_assistant is None and selected_ai == DEFAULT_AI_ASSISTANT:
+        console.print("[dim]No --ai provided; defaulting to Codex workspace integration.[/dim]")
 
     if not ignore_agent_tools:
         agent_config = AGENT_CONFIG.get(selected_ai)
@@ -1127,14 +1042,9 @@ def init(
 
     # Add Codex-specific setup step if needed
     if selected_ai == "codex":
-        codex_path = project_path / ".codex"
-        quoted_path = shlex.quote(str(codex_path))
-        if os.name == "nt":  # Windows
-            cmd = f"setx CODEX_HOME {quoted_path}"
-        else:  # Unix-like systems
-            cmd = f"export CODEX_HOME={quoted_path}"
-        
-        steps_lines.append(f"{step_num}. Set [cyan]CODEX_HOME[/cyan] environment variable before running Codex: [cyan]{cmd}[/cyan]")
+        steps_lines.append(
+            f"{step_num}. Open [cyan].codex/AGENTS.md[/cyan] for Codex-specific onboarding."
+        )
         step_num += 1
 
     steps_lines.append(f"{step_num}. Start using slash commands with your AI agent:")
@@ -1181,9 +1091,9 @@ def check():
         if requires_cli:
             agent_results[agent_key] = check_tool(agent_key, tracker=tracker)
         else:
-            # IDE-based agent - skip CLI check and mark as optional
-            tracker.skip(agent_key, "IDE-based, no CLI check")
-            agent_results[agent_key] = False  # Don't count IDE agents as "found"
+            # IDE-based agent - skip CLI check and mark as already managed by the editor
+            tracker.skip(agent_key, "IDE-based extension; managed in VS Code")
+            agent_results[agent_key] = True
 
     # Check VS Code variants (not in agent config)
     tracker.add("code", "Visual Studio Code")

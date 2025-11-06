@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
-- AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Codebuddy CLI](https://www.codebuddy.ai/cli) or [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+- AI coding agent: Codex VS Code extension (install from the [Codex repository](https://github.com/openai/codex) or VS Code Marketplace)
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
@@ -28,13 +28,10 @@ uvx --from git+https://github.com/github/spec-kit.git specify init --here
 
 ### Specify AI Agent
 
-You can proactively specify your AI agent during initialization:
+You can proactively specify the Codex agent during initialization (optional because it is the default):
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai gemini
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai copilot
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codebuddy
+uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codex
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -56,15 +53,15 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <project_name
 
 ### Ignore Agent Tools Check
 
-If you prefer to get the templates without checking for the right tools:
+If you prefer to skip future AI tool checks (not required for Codex):
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
+uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codex --ignore-agent-tools
 ```
 
 ## Verification
 
-After initialization, you should see the following commands available in your AI agent:
+After initialization, open `.codex/AGENTS.md` inside the Codex extension and you should see the following commands available:
 
 - `/speckit.specify` - Create specifications
 - `/speckit.plan` - Generate implementation plans  
