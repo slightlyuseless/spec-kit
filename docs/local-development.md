@@ -20,7 +20,7 @@ You can execute the CLI via the module entrypoint without installing anything:
 ```bash
 # From repo root
 python -m src.specify_cli --help
-python -m src.specify_cli init demo-project --ai claude --ignore-agent-tools --script sh
+python -m src.specify_cli init demo-project --ai codex --ignore-agent-tools --script sh
 ```
 
 If you prefer invoking the script file style (uses shebang):
@@ -52,7 +52,7 @@ Re-running after code edits requires no reinstall because of editable mode.
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
 
 ```bash
-uvx --from . specify init demo-uvx --ai copilot --ignore-agent-tools --script sh
+uvx --from . specify init demo-uvx --ai codex --ignore-agent-tools --script sh
 ```
 
 You can also point uvx at a specific branch without merging:
@@ -69,14 +69,14 @@ If you're in another directory, use an absolute path instead of `.`:
 
 ```bash
 uvx --from /mnt/c/GitHub/spec-kit specify --help
-uvx --from /mnt/c/GitHub/spec-kit specify init demo-anywhere --ai copilot --ignore-agent-tools --script sh
+uvx --from /mnt/c/GitHub/spec-kit specify init demo-anywhere --ai codex --ignore-agent-tools --script sh
 ```
 
 Set an environment variable for convenience:
 
 ```bash
 export SPEC_KIT_SRC=/mnt/c/GitHub/spec-kit
-uvx --from "$SPEC_KIT_SRC" specify init demo-env --ai copilot --ignore-agent-tools --script ps
+uvx --from "$SPEC_KIT_SRC" specify init demo-env --ai codex --ignore-agent-tools --script ps
 ```
 
 (Optional) Define a shell function:
@@ -123,7 +123,7 @@ When testing `init --here` in a dirty directory, create a temp workspace:
 
 ```bash
 mkdir /tmp/spec-test && cd /tmp/spec-test
-python -m src.specify_cli init --here --ai claude --ignore-agent-tools --script sh  # if repo copied here
+python -m src.specify_cli init --here --ai codex --ignore-agent-tools --script sh  # if repo copied here
 ```
 
 Or copy only the modified CLI portion if you want a lighter sandbox.
@@ -134,7 +134,7 @@ If you need to bypass TLS validation while experimenting:
 
 ```bash
 specify check --skip-tls
-specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
+specify init demo --skip-tls --ai codex --ignore-agent-tools --script ps
 ```
 
 (Use only for local experimentation.)

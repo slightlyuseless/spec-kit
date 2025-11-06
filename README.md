@@ -22,7 +22,7 @@
 - [🤔 What is Spec-Driven Development?](#-what-is-spec-driven-development)
 - [⚡ Get Started](#-get-started)
 - [📽️ Video Overview](#️-video-overview)
-- [🤖 Supported AI Agents](#-supported-ai-agents)
+- [🤖 Codex Integration](#-codex-integration)
 - [🔧 Specify CLI Reference](#-specify-cli-reference)
 - [📚 Core Philosophy](#-core-philosophy)
 - [🌟 Development Phases](#-development-phases)
@@ -82,6 +82,14 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME
 - Better tool management with `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
 - Cleaner shell configuration
 
+### VS Code Setup Snapshot
+
+1. Clone this repository locally: `git clone https://github.com/github/spec-kit.git && cd spec-kit`.
+2. Install the Codex VS Code extension (from the marketplace or the [Codex repository](https://github.com/openai/codex)).
+3. Open the folder in VS Code and launch a terminal (Terminal → New Terminal or the shortcut `Ctrl+\`` on Windows/Linux, `Cmd+\`` on macOS).
+4. Run `specify init --here` (or `specify init <project-name>` if you prefer a new directory).
+5. In the Codex panel, load `.codex/AGENTS.md` and follow the listed `/speckit.*` commands to drive the Spec-Driven Development workflow.
+
 ### 2. Establish project principles
 
 Launch your AI assistant in the project directory. The `/speckit.*` commands are available in the assistant.
@@ -132,24 +140,9 @@ Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.c
 
 [![Spec Kit video header](/media/spec-kit-video-header.jpg)](https://www.youtube.com/watch?v=a9eR1xsfvHg&pp=0gcJCckJAYcqIYzv)
 
-## 🤖 Supported AI Agents
+## 🤖 Codex Integration
 
-| Agent                                                     | Support | Notes                                             |
-|-----------------------------------------------------------|---------|---------------------------------------------------|
-| [Claude Code](https://www.anthropic.com/claude-code)      | ✅ |                                                   |
-| [GitHub Copilot](https://code.visualstudio.com/)          | ✅ |                                                   |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | ✅ |                                                   |
-| [Cursor](https://cursor.sh/)                              | ✅ |                                                   |
-| [Qwen Code](https://github.com/QwenLM/qwen-code)          | ✅ |                                                   |
-| [opencode](https://opencode.ai/)                          | ✅ |                                                   |
-| [Windsurf](https://windsurf.com/)                         | ✅ |                                                   |
-| [Kilo Code](https://github.com/Kilo-Org/kilocode)         | ✅ |                                                   |
-| [Auggie CLI](https://docs.augmentcode.com/cli/overview)   | ✅ |                                                   |
-| [CodeBuddy CLI](https://www.codebuddy.ai/cli)             | ✅ |                                                   |
-| [Roo Code](https://roocode.com/)                          | ✅ |                                                   |
-| [Codex CLI](https://github.com/openai/codex)              | ✅ |                                                   |
-| [Amazon Q Developer CLI](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️ | Amazon Q Developer CLI [does not support](https://github.com/aws/amazon-q-developer-cli/issues/3064) custom arguments for slash commands. |
-| [Amp](https://ampcode.com/) | ✅ | |
+This distribution of Spec Kit is streamlined for teams running the Codex VS Code extension. The `specify` CLI provisions Codex-ready slash-command prompts under `.codex/commands/` and drops a companion `.codex/AGENTS.md` file that Codex reads as its entry point. Install the Codex extension in VS Code, run `specify init` from the integrated terminal, then load `.codex/AGENTS.md` inside Codex to follow the guided Spec-Driven Development workflow.
 
 ## 🔧 Specify CLI Reference
 
@@ -160,16 +153,16 @@ The `specify` command supports the following options:
 | Command     | Description                                                    |
 |-------------|----------------------------------------------------------------|
 | `init`      | Initialize a new Specify project from the latest template      |
-| `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`) |
+| `check`     | Check for installed tools (`git` plus optional VS Code executables) |
 
 ### `specify init` Arguments & Options
 
 | Argument/Option        | Type     | Description                                                                  |
 |------------------------|----------|------------------------------------------------------------------------------|
 | `<project-name>`       | Argument | Name for your new project directory (optional if using `--here`, or use `.` for current directory) |
-| `--ai`                 | Option   | AI assistant to use: `claude`, `gemini`, `copilot`, `cursor-agent`, `qwen`, `opencode`, `codex`, `windsurf`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, or `q` |
+| `--ai`                 | Option   | AI assistant to use (defaults to `codex`) |
 | `--script`             | Option   | Script variant to use: `sh` (bash/zsh) or `ps` (PowerShell)                 |
-| `--ignore-agent-tools` | Flag     | Skip checks for AI agent tools like Claude Code                             |
+| `--ignore-agent-tools` | Flag     | Skip AI assistant tool checks (not required for Codex)                      |
 | `--no-git`             | Flag     | Skip git repository initialization                                          |
 | `--here`               | Flag     | Initialize project in the current directory instead of creating a new one   |
 | `--force`              | Flag     | Force merge/overwrite when initializing in current directory (skip confirmation) |
@@ -183,39 +176,28 @@ The `specify` command supports the following options:
 # Basic project initialization
 specify init my-project
 
-# Initialize with specific AI assistant
-specify init my-project --ai claude
-
-# Initialize with Cursor support
-specify init my-project --ai cursor-agent
-
-# Initialize with Windsurf support
-specify init my-project --ai windsurf
-
-# Initialize with Amp support
-specify init my-project --ai amp
+# Explicitly target Codex (optional, defaults to Codex already)
+specify init my-project --ai codex
 
 # Initialize with PowerShell scripts (Windows/cross-platform)
-specify init my-project --ai copilot --script ps
+specify init my-project --ai codex --script ps
 
 # Initialize in current directory
-specify init . --ai copilot
+specify init . --ai codex
 # or use the --here flag
-specify init --here --ai copilot
+specify init --here --ai codex
 
 # Force merge into current (non-empty) directory without confirmation
-specify init . --force --ai copilot
-# or 
-specify init --here --force --ai copilot
+specify init --here --force --ai codex
 
 # Skip git initialization
-specify init my-project --ai gemini --no-git
+specify init my-project --ai codex --no-git
 
 # Enable debug output for troubleshooting
-specify init my-project --ai claude --debug
+specify init my-project --ai codex --debug
 
 # Use GitHub token for API requests (helpful for corporate environments)
-specify init my-project --ai claude --github-token ghp_your_token_here
+specify init my-project --ai codex --github-token ghp_your_token_here
 
 # Check system requirements
 specify check
@@ -338,39 +320,23 @@ specify init --here --force
 
 ![Specify CLI bootstrapping a new project in the terminal](./media/specify_cli.gif)
 
-You will be prompted to select the AI agent you are using. You can also proactively specify it directly in the terminal:
+The CLI automatically provisions Codex assets. If you want to be explicit (for example in shell aliases or scripts), supply `--ai codex`:
 
 ```bash
-specify init <project_name> --ai claude
-specify init <project_name> --ai gemini
-specify init <project_name> --ai copilot
+specify init <project_name> --ai codex
 
 # Or in current directory:
-specify init . --ai claude
 specify init . --ai codex
 
-# or use --here flag
-specify init --here --ai claude
-specify init --here --ai codex
-
 # Force merge into a non-empty current directory
-specify init . --force --ai claude
-
-# or
-specify init --here --force --ai claude
+specify init --here --force --ai codex
 ```
 
-The CLI will check if you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, or Amazon Q Developer CLI installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
-
-```bash
-specify init <project_name> --ai claude --ignore-agent-tools
-```
+During initialization the CLI writes `.codex/AGENTS.md`, which Codex uses as its launchpad. Load that file inside the Codex extension to surface the bundled `/speckit.*` commands. (The `--ignore-agent-tools` flag remains available for future agent integrations, but Codex does not require additional checks.)
 
 ### **STEP 1:** Establish project principles
 
-Go to the project folder and run your AI agent. In our example, we're using `claude`.
-
-![Bootstrapping Claude Code environment](./media/bootstrap-claude-code.gif)
+Go to the project folder, open the VS Code command palette, and launch Codex in the integrated chat. Open `.codex/AGENTS.md` inside Codex so the extension ingests the workflow instructions and slash-command definitions.
 
 You will know that things are configured correctly if you see the `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, and `/speckit.implement` commands available.
 
@@ -410,7 +376,7 @@ see yours. You can edit any comments that you make, but you can't edit comments 
 delete any comments that you made, but you can't delete comments anybody else made.
 ```
 
-After this prompt is entered, you should see Claude Code kick off the planning and spec drafting process. Claude Code will also trigger some of the built-in scripts to set up the repository.
+After this prompt is entered, you should see Codex kick off the planning and spec drafting process. Codex will also trigger some of the built-in scripts to set up the repository.
 
 Once this step is completed, you should have a new branch created (e.g., `001-create-taskify`), as well as a new specification in the `specs/001-create-taskify` directory.
 
